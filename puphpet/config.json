@@ -452,7 +452,7 @@
 		"ensure": "master",
 		"install_zephir": true,
 		"install_devtools": true,
-		"devtools_version": "1.3.x",
+		"devtools_version": "master",
 		"zephir_build": false,
 		"debug": false,
 		"loglevel": "info"
