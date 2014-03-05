@@ -447,6 +447,7 @@
 	},
 	"phalcon": {
 		"install": 1,
+		"ensure": "master",
 		"ensure_sys_deps": true,
 		"compat_sys_deps": false,
 		"ensure": "master",
