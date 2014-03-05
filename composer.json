@@ -1,0 +1,19 @@
+{
+	"name": "pennycoders/bitcoinsms",
+	"description": "BitCoinSMS RESTFul API",
+	"minimum-stability": "dev",
+	"license": "proprietary",
+	"authors": [
+		{
+			"name": "Alex",
+			"email": "dtk077@gmail.com"
+		}
+	],
+	"require-dev": {
+		"phalcon/devtools": "dev-master"
+	},
+	"require": {
+		"phalcon/incubator": "dev-master",
+		"imagine/imagine": "dev-master"
+	}
+}

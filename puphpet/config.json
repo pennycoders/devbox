@@ -1,0 +1,550 @@
+{
+	"vagrantfile-local": {
+		"vm": {
+			"box": "centos65-x64-vbox43-1383512148",
+			"box_url": "http://puppet-vagrant-boxes.puppetlabs.com/centos-65-x64-virtualbox-puppet.box",
+			"hostname": "phalcon.es",
+			"network": {
+				"private_network": "192.168.56.144",
+				"forwarded_port": {
+					"ssh": {
+						"host": "5793",
+						"guest": "22"
+					},
+					"http": {
+						"host": "80",
+						"guest": "80"
+					}
+				}
+			},
+			"provider": {
+				"virtualbox": {
+					"modifyvm": {
+						"natdnshostresolver1": "on",
+						"memory": "512",
+						"name": "phalcon.es"
+					},
+					"setextradata": {
+						"VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root": 1
+					}
+				}
+			},
+			"provision": {
+				"puppet": {
+					"manifests_path": "puphpet/puppet",
+					"manifest_file": "manifest.pp",
+					"options": [
+						"--verbose",
+						"--hiera_config /vagrant/puphpet/puppet/hiera.yaml",
+						"--parser future"
+					]
+				}
+			},
+			"synced_folder": {
+				"www-root": {
+					"id": "www-root",
+					"source": "./",
+					"target": "/var/www/phalcon.es",
+					"type": "nfs",
+					"disabled": false
+				},
+				"/vagrant": {
+					"id": "vagrant",
+					"source": ".",
+					"target": "/vagrant",
+					"type": "nfs",
+					"disabled": false
+				}
+			},
+			"usable_port_range": "2200..2250"
+		},
+		"ssh": {
+			"host": null,
+			"port": null,
+			"private_key_path": null,
+			"username": "vagrant",
+			"password": null,
+			"guest_port": null,
+			"keep_alive": true,
+			"forward_agent": false,
+			"forward_x11": false,
+			"shell": "bash -l"
+		},
+		"vagrant": {
+			"host": "detect"
+		}
+	},
+	"server": {
+		"packages": [
+			"pam-devel",
+			"python-devel"
+		],
+		"dot_files": [
+			{
+				"bash_aliases": null
+			}
+		],
+		"_prevent_empty": ""
+	},
+	"mailcatcher": {
+		"install": 0,
+		"settings": {
+			"smtp_ip": "0.0.0.0",
+			"smtp_port": 1025,
+			"http_ip": "0.0.0.0",
+			"http_port": "1080",
+			"path": "/usr/local/bin",
+			"log": "/var/log/mailcatcher/mailcatcher.log"
+		}
+	},
+	"nginx": {
+		"gzip": "on",
+		"fpm_socket": "/var/run/php5-fpm.sock",
+		"mail": true,
+		"confd_purge": true,
+		"configtest_enable": true,
+		"manage_repo": true,
+		"worker_processes": "%{::processorcount}",
+		"worker_connections": 1024,
+		"http_cfg_append": {
+			"gzip_static": "on",
+			"gzip_comp_level": "9",
+			"gzip_disable": "msie6",
+			"gzip_types": "text/plain text/css application/json application/javascript application/x-javascript text/javascript text/xml application/xml application/rss+xml application/atom+xml application/rdf+xml",
+			"gzip_proxied": "any",
+			"gzip_vary": "on"
+		},
+		"vhosts": {
+			"default": {
+				"use_default_location":false,
+				"ensure": "present",
+				"listen_ip": "%{::ipaddress_eth1}",
+				"listen_port": 80,
+				"server_name": ["main.phalcon.es", "www.main.phalcon.es"],
+				"www_root": "/usr/share/nginx/html",
+				"access_log": "/var/log/nginx/default.access.log",
+				"error_log": "/var/log/nginx/default.error.log",
+				"index_files": ["index.html", "index.htm","index.php"],
+				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
+				"include_files": ["/etc/nginx/mime.types"],
+				"add_header":{
+					"X-req":"$request_uri",
+					"X-uri":"$uri"
+				}
+			},
+			"phalcon.es": {
+				"ensure": "present",
+				"use_default_location":false,
+				"server_name": ["phalcon.es", "www.phalcon.es"],
+				"listen_ip": "%{::ipaddress_eth1}",
+				"listen_port": 80,
+				"www_root": "/var/www/phalcon.es/public",
+				"access_log": "/var/log/nginx/phalcon.es.access.log",
+				"error_log": "/var/log/nginx/phalcon.es.error.log",
+				"index_files": ["index.php", "index.html", "index.htm"],
+				"try_files": ["$request_uri", "$request_uri/", "/index.php?_url=$request_uri"],
+				"include_files": ["/etc/nginx/mime.types"]
+			}
+		},
+		"locations": {
+			"default-php": {
+				"ensure": "present",
+				"vhost": "default",
+				"location": "~* \\.php$",
+				"fastcgi": "unix:/var/run/php5-fpm.sock",
+				"fastcgi_script": "$document_root$fastcgi_script_name",
+				"fastcgi_split_path": "^(.+\\.php)(/.+)$",
+				"priority": 502,
+				"try_files": ["$uri =404"],
+				"location_custom_cfg": {
+					"fastcgi_param": "PATH_INFO $fastcgi_path_info",
+					"fastcgi_param": "PATH_TRANSLATED $document_root$fastcgi_path_info",
+					"fastcgi_connect_timeout": "3m",
+					"fastcgi_read_timeout": "3m",
+					"fastcgi_send_timeout": "3m",
+					"fastcgi_index": "index.php",
+					"fastcgi_intercept_errors": "on"
+				}
+			},
+			"default-static": {
+				"ensure": "present",
+				"vhost": "default",
+				"location": "~* \\.(ico|3gp|gif|jpg|cur|svg|jpeg|png|wmv|avi|asf|asx|mpg|mpeg|mp4|woff|pls|mp3|mid|wav|swf|flv|js|html|htm|txt|css|exe|zip|tar|rar|gz|tgz|bz2|uha|7z|doc|docx|xls|xlsx|pdf|iso|htc)(\\?[0-9]+)?$",
+				"priority": 501,
+				"location_custom_cfg": {
+					"expires": "max",
+					"access_log": "off",
+					"log_not_found": "off",
+					"error_log": "off",
+					"add_header": "Pragma \"public\""
+				}
+			},
+			"phalcon.es-php": {
+				"ensure": "present",
+				"vhost": "phalcon.es",
+				"location": "~* \\.php$",
+				"fastcgi": "unix:/var/run/php5-fpm.sock",
+				"fastcgi_script": "$document_root$fastcgi_script_name",
+				"fastcgi_split_path": "^(.+\\.php)(/.+)$",
+				"priority": 502,
+				"try_files": ["$uri =404"],
+				"location_custom_cfg": {
+					"fastcgi_param": "PATH_INFO $fastcgi_path_info",
+					"fastcgi_param": "PATH_TRANSLATED $document_root$fastcgi_path_info",
+					"fastcgi_connect_timeout": "3m",
+					"fastcgi_read_timeout": "3m",
+					"fastcgi_send_timeout": "3m",
+					"fastcgi_index": "index.php",
+					"fastcgi_intercept_errors": "on"
+				}
+			},
+			"phalcon.es-static": {
+				"ensure": "present",
+				"vhost": "phalcon.es",
+				"location": "~* \\.(ico|3gp|gif|jpg|cur|svg|jpeg|png|wmv|avi|asf|asx|mpg|mpeg|mp4|woff|pls|mp3|mid|wav|swf|flv|js|html|htm|txt|css|exe|zip|tar|rar|gz|tgz|bz2|uha|7z|doc|docx|xls|xlsx|pdf|iso|htc)(\\?[0-9]+)?$",
+				"priority": 501,
+				"location_custom_cfg": {
+					"expires": "max",
+					"access_log": "off",
+					"log_not_found": "off",
+					"error_log": "off",
+					"add_header": "Pragma \"public\""
+				}
+			}
+		}
+	},
+	"nodejs": {
+		"install": 1,
+		"make_install": true,
+		"version": "stable",
+		"target_dir": "/usr/local/bin"
+
+	},
+	"nodejs_packages": {
+		"cordova": {
+			"ensure": "present",
+			"provider": "npm",
+			"require": "Class[nodejs]"
+		},
+		"grunt-cli": {
+			"ensure": "present",
+			"provider": "npm",
+			"require": "Class[nodejs]"
+		},
+		"yo": {
+			"ensure": "present",
+			"provider": "npm",
+			"require": "Class[nodejs]"
+		},
+		"less": {
+			"ensure": "present",
+			"provider": "npm",
+			"require": "Class[nodejs]"
+		}
+	},
+	"php": {
+		"version": "55",
+		"composer": 1,
+		"modules": {
+			"php": [
+				"cli",
+				"intl",
+				"mcrypt",
+				"gd",
+				"tidy",
+				"xcache",
+				"mbstring",
+				"pecl-memcached"
+			],
+			"pear": {},
+			"pecl": [
+				"redis",
+				"mosquitto"
+			]
+		},
+		"ini": {
+			"display_errors": "On",
+			"error_reporting": "-1",
+			"session.save_path": "/var/lib/php/session"
+		},
+		"timezone": "America/New_York",
+		"expose_php": "Off"
+	},
+	"xdebug": {
+		"install": 1,
+		"settings": {
+			"xdebug.default_enable": 1,
+			"xdebug.remote_autostart": 0,
+			"xdebug.remote_connect_back": 1,
+			"xdebug.remote_enable": 1,
+			"xdebug.remote_handler": "dbgp",
+			"xdebug.remote_port": "9000"
+		}
+	},
+	"xhprof": {
+		"install": 1
+	},
+	"drush": {
+		"install": 0,
+		"settings": {
+			"drush.tag_branch": "6.x"
+		}
+	},
+	"mysql": {
+		"install": 1,
+		"root_password": "root01@phalconPHP77",
+		"server_package_name": "MariaDB-server",
+		"client_package_name": "MariaDB-client",
+		"phpmyadmin": 1,
+		"adminer": 1,
+		"service_name": "mysql",
+		"service_enabled": true,
+		"service_manage": true,
+		"remove_default_accounts": true,
+		"manage_config_file": true,
+		"override_options": {
+			"mysqld": {
+				"pid-file": "/tmp/mysql.pid"
+			}
+		},
+		"dev": {
+			"SkzqECEhdnlw": {
+				"grant": [
+					"ALL"
+				],
+				"name": "dev",
+				"host": "localhost",
+				"user": "prod",
+				"password": "phalconPHP-dev",
+				"sql_file": false
+			},
+			"prod": {
+				"grant": [
+					"ALL"
+				],
+				"name": "prod",
+				"host": "localhost",
+				"user": "prod",
+				"password": "phalconPHP-prod",
+				"sql_file": false
+			}
+		}
+	},
+	"mongodb": {
+		"install": 1,
+		"auth": 1,
+		"port": "27017",
+		"databases": {
+			"dev": {
+				"name": "dev",
+				"user": "dev",
+				"password": "phallconMongoDev"
+			},
+			"prod": {
+				"name": "prod",
+				"user": "prod",
+				"password": "phallconMongoDev"
+			}
+		}
+	},
+	"custom_repos": {
+		"mariadb": {
+			"descr": "MariaDB 10.0 repository",
+			"baseurl": "http://yum.mariadb.org/10.0/centos6-amd64",
+			"gpgkey": "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB",
+			"enabled": 1,
+			"gpgcheck": 1
+		},
+		"jpackage-generic": {
+			"descr": "JPackage (free), generic",
+			"mirrorlist": "http://www.jpackage.org/mirrorlist.php?dist=generic&type=free&release=6.0",
+			"gpgkey": "http://www.jpackage.org/jpackage.asc",
+			"failovermethod": "priority",
+			"enabled": 1,
+			"gpgcheck": 1
+		}
+	},
+	"beanstalkd": {
+		"install": 0,
+		"settings": {
+			"listenaddress": "0.0.0.0",
+			"listenport": "13000",
+			"maxjobsize": "65535",
+			"maxconnections": "1024",
+			"binlogdir": "/var/lib/beanstalkd/binlog",
+			"binlogfsync": null,
+			"binlogsize": "10485760"
+		},
+		"beanstalk_console": 1,
+		"binlogdir": "/var/lib/beanstalkd/binlog"
+	},
+	"rabbitmq": {
+		"install": 0,
+		"port": "5672"
+	},
+	"elastic_search": {
+		"install": 0
+	},
+	"vsftpd": {
+		"install": 1,
+		"template": "vsftpd/vsftpd.conf.erb",
+		"manage_users": 1,
+		"puppi": true,
+		"service_status": true,
+		"port": 21,
+		"pam_service_name": "vsftpd",
+		"firewall": false,
+		"protocol": "tcp",
+		"anonymous_enable": false,
+		"anon_mkdir_write_enable": false,
+		"anon_upload_enable": false,
+		"chroot_local_user": true,
+		"connect_from_port_20": true,
+		"ftpd_banner": "Hey there, stranger!",
+		"guest_enable": false,
+		"local_enable": true,
+		"hide_ids": true,
+		"users": {
+			"phalcon": {
+				"ensure": "present",
+				"managehome": false,
+				"shell": "/sbin/nologin",
+				"password": "%{sha1('phalconFTP')}",
+				"home": "/var/www/phalcon.es",
+				"before": "Nginx::Resource::Vhost[phalcon.es]"
+			}
+		}
+	},
+	"memcached": {
+		"install": 1,
+		"package_ensure": "present",
+		"logfile": "/var/log/memcached.log",
+		"manage_firewall": false,
+		"max_memory": "12%",
+		"item_size": false,
+		"lock_memory": false,
+		"listen_ip": "0.0.0.0",
+		"tcp_port": "11211",
+		"udp_port": "11211",
+		"max_connections": "8192",
+		"install_dev": false,
+		"processorcount": "%{::processorcount}"
+	},
+	"mosquitto": {
+		"install": 1,
+		"listen_ip": "%{::ipaddress_eth1}",
+		"listen_port": "2000"
+	},
+	"redis": {
+		"install": 1,
+		"bind": "127.0.0.1",
+		"port": 6379,
+		"service_group": "redis",
+		"service_user": "redis",
+		"manage_repo": true,
+		"service_enable": true,
+		"config_owner": "root"
+	},
+	"phalcon": {
+		"install": 1,
+		"ensure_sys_deps": true,
+		"compat_sys_deps": false,
+		"ensure": "master",
+		"install_zephir": true,
+		"install_devtools": true,
+		"devtools_version": "1.3.x",
+		"zephir_build": false,
+		"debug": false,
+		"loglevel": "info"
+	},
+	"host_entries": {
+		"manage": 1,
+		"entries": {
+			"btc1": {
+				"ensure": "present",
+				"ip": "%{::ipaddress_eth1}",
+				"host_aliases": ["phalcon.local"],
+				"comment": "Local Phalcon host"
+			}
+		}
+	},
+	"ssh_auth_keys": {
+		"manage": 1,
+		"ssh_superuser": "root",
+		"keys": {
+			"alex": {
+				"ensure": "present",
+				"key": "AAAAB3NzaC1yc2EAAAABJQAAAgEAjv7w2R6uT/NGR7vaC271ldbw0jMHxCFYR0tyDisp6G95quKItc6Xp+CJfPrBRWI5ATX8NxE64XHUyH3s5kqFbVbdanDEWJY+Hnwi6YYj7VDcLpuEc3W2ZsS3XsX/N4HCnqC72LDmULvXkis6JNHUTBbuhSrv1U17HsLDHANMFTw8NnWFl1Eu6iDmUc32LszX/TJM9lg5EJ55ahlIjwSMEBBDLHuNrUU/6Wb1ZPKCrK/Xd/dVWSKuo+FC+vlInD++ZH9+2ytbWmsEsTVs5l5maQtRIy2Cjahr3Xxoki3qvOrH3BkY7twgTyT/+YBXcNBPWA9KA1dZ0iFxOHBuovXMKi7OLTMRgE7b8dmVgWRc5DZPftuFNcAI3h64o+QitOuNdbaIxrSiEtwLxHNUF5qK0iuoCV/Dpgz8s3xr/+K8H1M6Vy16N6jqSqEMN5oOfmn/dyThs0mFlgoV0uf8s1D1emvxITh4KVAuFccKNxUs3tc+qpYom3CSkuWB444aQ3UEepYnT/t/6hjTKO++odhxxakOKq+4iXNWH0RGP1GUD4tfpN7klQZwRcGUH4xUnePGQy2MmqXc3FMFiuz0w7V/1/BL2Kt6hRgwSxBVQWaWDtK0KJ1yi31R2ytlDfRHX8uUrdqNR8bt55RaXO+iJ+1lBN3cpUz0ZaQkf3lBVFnSyT0=",
+				"type": "ssh-rsa",
+				"user": "%{::ssh_superuser}"
+			}
+		}
+	},
+	"sudo_config": {
+		"manage": 1
+
+	},
+	"ssh_config": {
+		"manage": 1,
+		"replace_config": true,
+		"port": 22,
+		"permit_root_login": "yes",
+		"log_level": "INFO",
+		"x11_forwarding": "no",
+		"max_auth_tries": 3,
+		"password_authentication": "yes",
+		"client_alive_interval": 1000,
+		"client_alive_count_max": 0,
+		"allow_users": "UNSET",
+		"deny_users": "UNSET",
+		"banner": "/etc/issue.net",
+		"sftp_chroot": true,
+		"restart_service": true,
+		"config_template": "openssh/redhat.sshd_config.erb",
+		"package_name": "openssh",
+		"package_ensure": "present",
+		"service_name": "sshd",
+		"service_ensure": "running",
+		"service_enable": true,
+		"require": ["Firewall[010 allow ssh]"]
+	},
+	"puppetdb": {
+		"use": 0,
+		"master": 1,
+		"node_config": {},
+		"naster_config": {},
+		"general_config": {}
+	},
+	"firewall": {
+		"setup": 1,
+		"rules": {
+			"002 accept related established rules": {
+				"proto": "all",
+				"ctstate": ["RELATED", "ESTABLISHED"],
+				"action": "accept"
+			},
+			"006 nginx-http-https": {
+				"ensure": "present",
+				"port": [80, 443],
+				"proto": "tcp",
+				"action": "accept",
+				"destination": "%{::ipaddress_eth0}"
+			},
+			"007 vsftpd": {
+				"ensure": "present",
+				"port": [21],
+				"proto": "tcp",
+				"action": "accept",
+				"destination": "%{::ipaddress_eth0}"
+			},
+			"008 mqtt": {
+				"ensure": "present",
+				"port": [2000],
+				"proto": "tcp",
+				"action": "accept",
+				"src_range": "172.18.29.12-172.18.29.13",
+				"destination": "%{::ipaddress_eth1}"
+			}
+		}
+	}
+}

@@ -1,0 +1,4 @@
+.vagrant/
+tmbundles/
+vendor/
+sql_files/
