@@ -1100,9 +1100,17 @@ if $mosquitto_values['install'] == 1 {
 $phalconphp_values = hiera('phalcon', false)
 
 if $phalconphp_values['install'] == 1 {
-  class { 'phalconphp':
-	  ensure_sys_deps => true
-  }
+	class {'phalconphp':
+		ensure_sys_deps=>$phalconphp_values['ensure_sys_deps'],
+		ensure=>$phalconphp_values['ensure'],
+		install_devtools=>$phalconphp_values['install_devtools'],
+		devtools_version=>$phalconphp_values['devtools_version'],
+		install_zephir=>$phalconphp_values['install_zephir'],
+		compat_sys_deps=>$phalconphp_values['compat_sys_deps'],
+		zephir_build=>$phalconphp_values['zephir_build'],
+		ini_file=>$phalconphp_values['ini_file'],
+		debug=>$phalconphp_values['debug']
+	}
 }
 
 # Redis Manifest
