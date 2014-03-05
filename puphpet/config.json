@@ -460,7 +460,7 @@
 	"host_entries": {
 		"manage": 1,
 		"entries": {
-			"btc1": {
+			"phalcon.local": {
 				"ensure": "present",
 				"ip": "%{::ipaddress_eth1}",
 				"host_aliases": ["phalcon.local"],
