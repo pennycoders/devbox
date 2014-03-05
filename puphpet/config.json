@@ -148,6 +148,7 @@
 		},
 		"locations": {
 			"default-root":{
+				"location":"/",
 				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
 				"vhost":"default",
 				"location_custom_cfg":{
@@ -187,6 +188,7 @@
 				}
 			},
 			"phalcon.es-root":{
+				"location":"/",
 				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
 				"vhost":"phalcon.es",
 				"location_custom_cfg":{
