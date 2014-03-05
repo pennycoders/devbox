@@ -150,6 +150,7 @@
 			"default-root":{
 				"ensure":"present",
 				"location":"/",
+				"www_root": "/usr/share/nginx/html",
 				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
 				"vhost":"default",
 				"location_cfg_append":{
@@ -191,6 +192,7 @@
 			"phalcon.es-root":{
 				"ensure":"present",
 				"location":"/",
+				"www_root": "/var/www/phalcon.es/public",
 				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
 				"vhost":"phalcon.es",
 				"location_cfg_append":{
