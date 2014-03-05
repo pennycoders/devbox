@@ -147,6 +147,13 @@
 			}
 		},
 		"locations": {
+			"default-root":{
+				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
+				"vhost":"default",
+				"location_custom_cfg":{
+					"gzip":"on"
+				}
+			},
 			"default-php": {
 				"ensure": "present",
 				"vhost": "default",
@@ -177,6 +184,13 @@
 					"log_not_found": "off",
 					"error_log": "off",
 					"add_header": "Pragma \"public\""
+				}
+			},
+			"phalcon.es-root":{
+				"try_files": ["$request_uri", "$request_uri/", "/index.php$is_args$args"],
+				"vhost":"phalcon.es",
+				"location_custom_cfg":{
+					"gzip":"on"
 				}
 			},
 			"phalcon.es-php": {
