@@ -1,0 +1,23 @@
+{
+  "name": "nodejs-spy",
+  "version": "1.0.0",
+  "description": "NodeJS Mqtt client app",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@bitbucket.org:pennycoders/bitcoinsms.git"
+  },
+  "keywords": [
+    "Nodejs",
+    "Mqtt"
+  ],
+  "author": "Alex <dtk077@gmail.com>",
+  "license": "PRIVATE",
+  "dependencies": {
+    "mqtt": "~0.3.7",
+    "memcached": "~0.2.6"
+  }
+}

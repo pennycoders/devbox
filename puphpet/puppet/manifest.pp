@@ -264,7 +264,7 @@ define add_dotdeb (
   }
 }
 
-# # Begin MailCatcher manifest
+# Begin MailCatcher manifest
 
 if $mailcatcher_values == undef {
   $mailcatcher_values = hiera('mailcatcher', false)
